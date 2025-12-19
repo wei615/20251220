@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>古風測驗 - 尋覓前世今生</title>
+    <style>
+        /* 基礎樣式重置 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* 防止出現滾動條 */
+            font-family: "Microsoft JhengHei", "PingFang TC", serif;
+        }
+
+        /* 背景圖設定 */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://i.pinimg.com/736x/3f/2b/11/3f2b116e84f13aa3dc0be4d83254af17.jpg');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+        }
+
+        /* 主容器 */
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.2); /* 淡淡的暗化背景，突顯文字 */
+        }
+
+        /* 標題樣式 */
+        .title {
+            color: #fff;
+            font-size: 3.5rem; /* 稍微加大字體 */
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.6), 2px 2px 4px rgba(0, 0, 0, 0.8); /* 加入淡金色光暈與陰影 */
+            margin-bottom: 60px;
+            letter-spacing: 15px;
+            font-weight: 700;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4); /* 底部裝飾線 */
+            padding-bottom: 20px;
+            animation: titleEntry 1.5s ease-out; /* 進場動畫 */
+        }
+
+        @keyframes titleEntry {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 按鈕群組容器：讓按鈕橫向排列並保持間距 */
+        .button-group {
+            display: flex;
+            flex-direction: row;
+            gap: 50px; /* 設定按鈕之間的間距 */
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap; /* 螢幕較窄時自動換行 */
+        }
+
+        /* 按鈕樣式 */
+        .start-btn {
+            padding: 20px 60px; /* 增加內距讓按鈕更大 */
+            font-size: 2rem; /* 放大字體 */
+            color: #fff;
+            /* 移除背景與邊框，改用漸層模擬卷軸質感 */
+            background: linear-gradient(to right, rgba(0,0,0,0.2), rgba(0,0,0,0.5), rgba(0,0,0,0.2));
+            border: none;
+            border-radius: 50px; /* 調整圓角，使其像卷軸 */
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); /* 淡金色陰影 */
+            text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(to right, rgba(0,0,0,0.4), rgba(0,0,0,0.7), rgba(0,0,0,0.4));
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.6); /* 金色發光效果增強 */
+            letter-spacing: 5px;
+        }
+
+        /* 梅花飄落容器 */
+        #plum-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* 讓點擊穿透，不影響按鈕 */
+            z-index: 1;
+        }
+
+        /* 梅花個體樣式 */
+        .plum {
+            position: absolute;
+            color: #ffb7c5; /* 粉嫩的梅花顏色 */
+            user-select: none;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-10vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background"></div>
+
+    <div id="plum-container"></div>
+
+    <div class="container">
+        <h1 class="title">五言詩學習平台</h1>
+        <div class="button-group">
+            <a href="poet.html" class="start-btn">詩人小傳</a>
+            <a href="20251216.htm" class="start-btn">測驗開始</a>
+            <a href="#" class="start-btn">詩境導讀</a>
+        </div>
+    </div>
+
+    <script>
+        // 梅花飄落腳本
+        function createPlum() {
+            const container = document.getElementById('plum-container');
+            const plum = document.createElement('div');
+            
+            // 隨機樣式
+            const size = Math.random() * 15 + 10 + 'px'; // 10px ~ 25px
+            const left = Math.random() * 100 + 'vw';
+            const duration = Math.random() * 5 + 5 + 's'; // 5s ~ 10s 緩慢落下
+            const delay = Math.random() * 5 + 's';
+            
+            plum.classList.add('plum');
+            // 使用 Unicode 的小花符號，模擬梅花
+            plum.innerHTML = '🌸'; 
+            plum.style.fontSize = size;
+            plum.style.left = left;
+            plum.style.animationDuration = duration;
+            plum.style.animationDelay = delay;
+            plum.style.opacity = Math.random();
+
+            container.appendChild(plum);
+
+            // 動畫結束後移除元素，避免佔用記憶體
+            setTimeout(() => {
+                plum.remove();
+            }, (parseFloat(duration) + parseFloat(delay)) * 1000);
+        }
+
+        // 每隔一段時間生成一朵梅花
+        setInterval(createPlum, 300);
+
+        // 初始化生成一些，讓畫面一開始就有花
+        for(let i=0; i<15; i++) {
+            createPlum();
+        }
+    </script>
+</body>
+</html>

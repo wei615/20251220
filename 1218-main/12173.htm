@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en" prefix="dc: http://purl.org/dc/elements/1.1/">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>成語填字遊戲</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root{
+    --strFontFace:      Geneva,Arial,sans-serif;
+    --strFontSize:      medium;
+    --strTextColor:      #000000;
+    --strTitleColor:     #000000;
+    --strFuncLightColor: #f7f5eb;
+    --strFuncShadeColor: #78756c;
+    --strLinkColor:      #81c3d7;
+    --strVLinkColor:     #134074;
+    --strNavBarColor:    #002f4a;
+    --strNavLightColor:  #7f97a4;
+    --strNavShadeColor:  #001725;
+    --strNavTextColor:   #ffffff;
+    --strPageBGColor:    #748cab;
+    --strExBGColor:      #f0ebd8;
+}
+
+body{
+    font-family: var(--strFontFace);
+    background-color: var(--strPageBGColor);
+    color: var(--strTextColor);
+    margin-right: 5%;
+    margin-left: 5%;
+    font-size: var(--strFontSize);
+    padding-bottom: 0.5em;
+}
+
+p{ text-align: left; margin: 0px; font-size: 1em; }
+table,div,span,td{ font-size: 1em; color: var(--strTextColor); }
+div.Titles{ padding: 0.5em;; text-align: center; color: var(--strTitleColor); }
+button{ font-family: var(--strFontFace); font-size: 1em; display: inline; }
+.ExerciseSubtitle{ font-size: 120%; color: var(--strTitleColor); }
+
+div.StdDiv, div.ExerciseContainer, div.ReadingContainer{
+    background-color: var(--strExBGColor);
+    text-align: center;
+    font-size: 1em;
+    color: var(--strTextColor);
+    padding: 0.5em;
+    border-style: solid;
+    border-width: 1px 1px 1px 1px;
+    border-color: var(--strTextColor);
+    margin-bottom: 1px;
+}
+
+div.ReadingContainer, div.ExerciseContainer{
+    min-width: 15em;
+    flex-grow: 1;
+    flex-basis: 0;
+    margin: 1px;
+}
+
+div.ReadingContainer{
+    background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('https://pic.mksucai.com/00/46/05/3b25cff5759e64bc.webp');
+    background-size: cover;
+    background-position: center;
+    font-family: 'Ma Shan Zheng', cursive;
+}
+
+div.ReadingContainer h3, div.ReadingContainer p { color: #5C4033; text-align: center; }
+div.ReadingContainer h3 { font-size: 2.2em; }
+div.ReadingContainer p { font-size: 1.1em; }
+
+p.GameHint { font-family: 'Ma Shan Zheng', cursive; font-size: 1.1em; color: #5C4033; margin-bottom: 1em; }
+
+div#ContainerDiv{
+    margin: -1px;
+    padding: 0;
+    border: none;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+div.Feedback {
+    background-color: var(--strPageBGColor);
+    left: 33%; width: 34%; top: 33%; z-index: 1001;
+    border-style: solid; border-width: 2px; padding: 20px;
+    text-align: center; color: var(--strTitleColor);
+    position: absolute; display: none; font-size: 1.2em;
+    border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+/* 哭哭表情動畫樣式 */
+@keyframes cryShake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+}
+.cry-emoji {
+    font-size: 3rem;
+    display: inline-block;
+    animation: cryShake 0.5s infinite;
+}
+
+/* 表情符號容器樣式 */
+.result-emoji {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+table.CrosswordGrid{ margin: auto auto 1em auto; border-collapse: collapse; padding: 0px; background-color: #000000; }
+table.CrosswordGrid tbody tr td{
+    width: 1.5em; height: 1.5em; text-align: center; vertical-align: middle;
+    font-size: 140%; padding: 1px; margin: 0px; border-style: solid;
+    border-width: 1px; border-color: #000000; color: #000000;
+}
+table.CrosswordGrid td.BlankCell{ background-color: #000000; }
+table.CrosswordGrid td.LetterOnlyCell{ background-color: #ffffff; color: #000000; font-weight: bold; }
+table.CrosswordGrid td.NumLetterCell{ background-color: #ffffff; color: #000000; padding: 1px; font-weight: bold; text-align: left; vertical-align: top; }
+.NumLetterCellText{ cursor: pointer; color: #000000; }
+.GridNum{ vertical-align: super; font-size: 66%; font-weight: bold; text-decoration: none; color: #000000; }
+
+.FuncButton {
+    border-style: solid; border-radius: 0.5em; padding: 0.5em; min-width: 3em;
+    border-left-color: var(--strFuncLightColor); border-top-color: var(--strFuncLightColor);
+    border-right-color: var(--strFuncShadeColor); border-bottom-color: var(--strFuncShadeColor);
+    color: var(--strTextColor); background-color: var(--strExBGColor);
+    border-width: 1pt; cursor: pointer; box-shadow: 0.2em 0.3em 0.2em var(--strFuncShadeColor);
+}
+.FuncButton:hover{ color: var(--strExBGColor); background-color: var(--strTextColor); }
+
+div.NavButtonBar{ background-color: var(--strNavBarColor); text-align: center; margin: 0.25rem 0; clear: both; font-size: 1em; padding: 0.2em; }
+.NavButton {
+    border-style: solid; border-radius: 0.5em; padding: 0.5em; min-width: 3em;
+    border-left-color: var(--strNavLightColor); border-top-color: var(--strNavLightColor);
+    border-right-color: var(--strNavShadeColor); border-bottom-color: var(--strNavShadeColor); 
+    background-color: var(--strNavBarColor); color: var(--strNavTextColor);
+    border-width: 1pt; cursor: pointer; box-shadow: 0.2em 0.3em 0.2em var(--strNavShadeColor);
+}
+.NavButton:hover{ color: var(--strNavBarColor); background-color: var(--strNavTextColor); }
+a{ color: var(--strLinkColor); }
+.ClueNum { font-weight: bold; }
+</style>
+
+<script>
+//<![CDATA[
+
+var Locked = false;
+var Score = 0;
+var HintCounts = { 1: 0, 2: 0, "3-1": 0, "3-2": 0, 4: 0, 5: 0 };
+
+var L = [
+    ['\u8D74', '\u6E6F', '\u8E48', '\u706B', '', '\u5982', '\u96F7', '\u704C', '\u8033'],
+    ['', '', '', '\u6A39', '', '\u82B1', '', '', '\u98DF'],
+    ['', '', '', '\u9280', '', '\u4F3C', '', '', '\u4E4B'],
+    ['', '', '\u7E41', '\u82B1', '\u4F3C', '\u9326', '', '', '\u8AC7']
+];
+
+var G = [
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', ''],
+    ['', '', '', '', '', '', '', '', '']
+];
+
+function ShowClue(ClueNum){
+    if (Locked) return;
+    var Html = '';
+    if (ClueNum == 3) {
+        Html += '<form onsubmit="return false;"><span class="ClueNum">橫向 3: </span>形容名聲極大。 ';
+        Html += '<input id="GuessBox_3-1" size="10"> ';
+        Html += '<button class="FuncButton" onclick="EnterGuess(true,0,5,\'3-1\')">輸入答案</button> ';
+        Html += '<button class="FuncButton" onclick="ShowHint(true,0,5,\'3-1\')">提示</button></form>';
+
+        Html += '<form onsubmit="return false;"><span class="ClueNum">縱向 3: </span>形容衣著華麗。 ';
+        Html += '<input id="GuessBox_3-2" size="10"> ';
+        Html += '<button class="FuncButton" onclick="EnterGuess(false,0,5,\'3-2\')">輸入答案</button> ';
+        Html += '<button class="FuncButton" onclick="ShowHint(false,0,5,\'3-2\')">提示</button></form>';
+    } else {
+        var data = {
+            1: { label: "橫向 1", text: "前往危險的地方，比喻不避艱險。", isAcross: true, sx: 0, sy: 0 },
+            2: { label: "縱向 2", text: "形容燦爛絢麗的夜景或煙火。", isAcross: false, sx: 0, sy: 3 },
+            4: { label: "縱向 4", text: "指沒有根據的傳聞。", isAcross: false, sx: 0, sy: 8 },
+            5: { label: "橫向 5", text: "形容美好的景色和美好的事物。", isAcross: true, sx: 3, sy: 2 }
+        };
+        var d = data[ClueNum];
+        Html += '<form onsubmit="return false;"><span class="ClueNum">' + d.label + ': </span>' + d.text + '<br>';
+        Html += '<input id="GuessBox_' + ClueNum + '" size="10"> ';
+        Html += '<button class="FuncButton" onclick="EnterGuess(' + d.isAcross + ',' + d.sx + ',' + d.sy + ',\'' + ClueNum + '\')">輸入答案</button> ';
+        Html += '<button class="FuncButton" onclick="ShowHint(' + d.isAcross + ',' + d.sx + ',' + d.sy + ',\'' + ClueNum + '\')">提示</button></form>';
+    }
+    document.getElementById('ClueEntry').innerHTML = Html;
+}
+
+function EnterGuess(IsAcross, x, y, idKey){
+    var val = document.getElementById('GuessBox_' + idKey).value;
+    var cx = x; var cy = y;
+    for (var i=0; i < val.length; i++){
+        if (cx < L.length && cy < L[0].length && L[cx][cy] != ''){
+            G[cx][cy] = val.charAt(i);
+            document.getElementById('L_' + cx + '_' + cy).innerHTML = G[cx][cy];
+        }
+        if (IsAcross) cy++; else cx++;
+    }
+}
+
+function ShowHint(IsAcross, x, y, idKey){
+    if (Locked) return;
+    if (HintCounts[idKey] < 4) HintCounts[idKey]++;
+    var offset = HintCounts[idKey] - 1;
+    var tx = IsAcross ? x : x + offset;
+    var ty = IsAcross ? y + offset : y;
+
+    if (tx < L.length && ty < L[0].length) {
+        G[tx][ty] = L[tx][ty];
+        document.getElementById('L_' + tx + '_' + ty).innerHTML = L[tx][ty];
+    }
+}
+
+function CheckAnswers(){
+    if (Locked) return;
+    var wrong = 0;
+    var done = true;
+
+    for (var i=0; i<L.length; i++){
+        for (var j=0; j<L[0].length; j++){
+            if (L[i][j] != ''){
+                if (G[i][j] != L[i][j]){
+                    wrong++;
+                    done = false;
+                    G[i][j] = '';
+                    document.getElementById('L_' + i + '_' + j).innerHTML = '&#160;&#160;&#160;';
+                }
+            }
+        }
+    }
+
+    var penalty = 0;
+    for (var k in HintCounts) {
+        if (HintCounts[k] > 2) penalty += (HintCounts[k] - 2) * 5;
+    }
+
+    Score = 100 - (wrong * 5) - penalty;
+    if (Score < 0) Score = 0;
+
+    // 特效分歧處理
+    var emoji = "", effMsg = "";
+    if (done && Score === 100) {
+        emoji = "<span class='result-emoji'>🌈🏆</span>";
+        effMsg = "完美！你是成語大師！";
+        triggerFirework(); 
+    } else if (Score >= 90) {
+        emoji = "<span class='result-emoji'>😘</span>";
+        effMsg = "太棒了！差一點點就滿分了！";
+        triggerStars(); 
+    } else if (Score >= 70) {
+        emoji = "<span class='result-emoji'>😉</span>";
+        effMsg = "做得好！表現很穩定喔！";
+        triggerPoppers(); 
+    } else if (Score > 60) {
+        emoji = "<span class='result-emoji'>💪</span>";
+        effMsg = "及格了！再加油一點點！";
+    } else {
+        emoji = "<div class='cry-emoji'>😢</div>";
+        effMsg = "哎呀...再多查查成語典吧！";
+    }
+
+    var gameMsg = done ? "<b>恭喜！全部正確！</b>" : "有些字填錯了，已被清空，請再試試看。";
+    var msg = emoji + "<br>" + effMsg + "<br>" + gameMsg + "<br><br><span style='font-size:1.5em; color:red;'>得分：" + Score + " 分</span>";
+    if (penalty > 0) msg += "<br>(提示扣分：" + penalty + " 分)";
+
+    document.getElementById('FeedbackContent').innerHTML = msg + "<br><br>";
+    document.getElementById('FeedbackDiv').style.display = "block";
+    document.getElementById('Instructions').innerHTML = '<span style="color:red; font-weight:bold;">目前得分：' + Score + ' 分</span>';
+    
+    if (done) Locked = true;
+}
+
+function triggerFirework() {
+    var duration = 3 * 1000;
+    var animationEnd = Date.now() + duration;
+    var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 2000 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    var interval = setInterval(function() {
+      var timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) return clearInterval(interval);
+      var particleCount = 50 * (timeLeft / duration);
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+}
+
+function triggerStars() {
+    var defaults = { spread: 360, ticks: 50, gravity: 0, decay: 0.94, startVelocity: 30, shapes: ['star'], colors: ['FFE333', 'FFBD00', 'E89400'] };
+    confetti({ ...defaults, particleCount: 40, scalar: 1.2 });
+    confetti({ ...defaults, particleCount: 10, scalar: 0.75 });
+}
+
+function triggerPoppers() {
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+}
+
+function HideFeedback(){
+    document.getElementById('FeedbackDiv').style.display = "none";
+}
+//]]>
+</script>
+</head>
+
+<body id="TheBody">
+
+<div class="NavButtonBar">
+    <button class="NavButton" onclick="location='index.html'; return false;">回首頁</button>
+    <button class="NavButton" onclick="location='12175.htm'; return false;">下一頁</button>
+</div>
+
+<div class="Titles">
+    <h3 class="ExerciseSubtitle" style="font-size: 22.4px; margin-bottom: 0.2em;">成語填字遊戲</h3>
+    <p style="font-size: 19.2px; text-align: center; margin: 1em 0 0 0; font-weight: bold;">縱橫謎題練習</p>
+</div>
+
+<div id="InstructionsDiv" class="StdDiv" style="margin-top: 2.5em;">
+    <div id="Instructions">請點擊數字開始填寫。錯一字扣 5 分。前兩次提示免費，第三次起每次扣 5 分。</div>
+</div>
+
+<div id="ContainerDiv">
+    <div class="ReadingContainer" style="padding: 2em 2em 3em;">
+        <h3>需要幫忙嗎？</h3>
+        <p>點擊下方按鈕查詢成語。</p>
+        <br>
+        <a href="https://dict.idioms.moe.edu.tw/" target="_blank" class="FuncButton">開啟成語典</a>
+    </div>
+
+    <div class="ExerciseContainer">
+        <div id="ClueEntry"></div>
+        <p class="GameHint">請點選方格內的數字進行填寫</p>
+        
+        <table class="CrosswordGrid">
+            <tbody>
+                <tr id="Row_0">
+                    <td class="NumLetterCell"><a href="javascript:void(0);" class="GridNum" onclick="ShowClue(1,0,0)">1</a><span class="NumLetterCellText" id="L_0_0" onclick="ShowClue(1,0,0)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_0_1" onclick="ShowClue(1,0,0)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_0_2" onclick="ShowClue(1,0,0)">&#160;&#160;&#160;</span></td>
+                    <td class="NumLetterCell"><a href="javascript:void(0);" class="GridNum" onclick="ShowClue(2,0,3)">2</a><span class="NumLetterCellText" id="L_0_3" onclick="ShowClue(2,0,3)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td>
+                    <td class="NumLetterCell"><a href="javascript:void(0);" class="GridNum" onclick="ShowClue(3,0,5)">3</a><span class="NumLetterCellText" id="L_0_5" onclick="ShowClue(3,0,5)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_0_6" onclick="ShowClue(3,0,5)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_0_7" onclick="ShowClue(3,0,5)">&#160;&#160;&#160;</span></td>
+                    <td class="NumLetterCell"><a href="javascript:void(0);" class="GridNum" onclick="ShowClue(4,0,8)">4</a><span class="NumLetterCellText" id="L_0_8" onclick="ShowClue(4,0,8)">&#160;&#160;&#160;</span></td>
+                </tr>
+                <tr id="Row_1">
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_1_3" onclick="ShowClue(2,0,3)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_1_5" onclick="ShowClue(3,0,5)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_1_8" onclick="ShowClue(4,0,8)">&#160;&#160;&#160;</span></td>
+                </tr>
+                <tr id="Row_2">
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_2_3" onclick="ShowClue(2,0,3)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_2_5" onclick="ShowClue(3,0,5)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_2_8" onclick="ShowClue(4,0,8)">&#160;&#160;&#160;</span></td>
+                </tr>
+                <tr id="Row_3">
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="NumLetterCell"><a href="javascript:void(0);" class="GridNum" onclick="ShowClue(5,3,2)">5</a><span class="NumLetterCellText" id="L_3_2" onclick="ShowClue(5,3,2)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_3_3" onclick="ShowClue(5,3,2)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_3_4" onclick="ShowClue(5,3,2)">&#160;&#160;&#160;</span></td>
+                    <td class="LetterOnlyCell"><span id="L_3_5" onclick="ShowClue(5,3,2)">&#160;&#160;&#160;</span></td>
+                    <td class="BlankCell">&#160;</td><td class="BlankCell">&#160;</td>
+                    <td class="LetterOnlyCell"><span id="L_3_8" onclick="ShowClue(4,0,8)">&#160;&#160;&#160;</span></td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <button class="FuncButton" onclick="CheckAnswers()">核對答案並計算分數</button>
+    </div>
+</div>
+
+<div class="Feedback" id="FeedbackDiv">
+    <div id="FeedbackContent"></div>
+    <button class="FuncButton" onclick="HideFeedback();">確定</button>
+</div>
+
+</body>
+</html>
